@@ -84,6 +84,11 @@ h2 {
     border-bottom: 1px solid #eee;
 }
 
+#feedback-container {
+    margin-top: 20px; /* 解説と選択肢の間に余白を追加 */
+    text-align: left;   /* ★解説文を左揃えに */
+}
+
 #timer-display {
     font-size: 24px;
     font-weight: bold;
