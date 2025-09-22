@@ -249,15 +249,18 @@ h2 {
     color: #fff;
 }
 
-/* 結果・分析画面のフッターボタン */
-.results-footer, .analysis-footer {
+/* === 結果・分析画面のフッター共通スタイル === */
+.results-footer,
+.analysis-footer {
     margin-top: 30px;
     display: flex;
     justify-content: center;
     gap: 15px;
 }
 
-.results-footer button, .analysis-footer button {
+/* フッター内のボタンの共通スタイル */
+.results-footer button,
+.analysis-footer button {
     width: 180px;
     padding: 12px 0;
     font-size: 16px;
@@ -266,14 +269,24 @@ h2 {
     cursor: pointer;
     transition: all 0.3s ease;
     color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-#back-to-top-btn, #back-from-analysis-btn {
+.results-footer button:hover,
+.analysis-footer button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+
+/* === ボタンごとの個別スタイル（色のみ指定） === */
+#back-to-top-btn,
+#back-from-analysis-btn {
     background-color: #007bff;
 }
-#back-to-top-btn:hover, #back-from-analysis-btn:hover {
+#back-to-top-btn:hover,
+#back-from-analysis-btn:hover {
     background-color: #0056b3;
-    transform: translateY(-2px);
 }
 
 #reset-history-btn {
@@ -281,7 +294,6 @@ h2 {
 }
 #reset-history-btn:hover {
     background-color: #c82333;
-    transform: translateY(-2px);
 }
 
 /* 分析画面のテーブル */
