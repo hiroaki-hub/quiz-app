@@ -217,6 +217,8 @@ h2 {
     border: 1px solid #e9ecef;
     border-radius: 8px;
     background-color: #fff;
+    margin-bottom: 20px;
+    text-align: left;
 }
 
 .result-item.correct {
