@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模擬試験アプリ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-container">
+        <h1>模擬試験アプリ</h1>
+        <div id="mode-selection-view">
+            <p>モードを選択してください</p>
+            <div class="mode-selection">
+                <button id="practice-mode-btn" class="mode-btn">練習モード</button>
+                <button id="exam-mode-btn" class="mode-btn">本番モード</button>
+                <button id="analysis-mode-btn" class="mode-btn">分析モード</button>
+            </div>
+        </div>
+
+        <!-- クイズ表示画面（最初は非表示） -->
+        <div id="quiz-view" style="display: none;">
+            <div id="quiz-header">
+                <h2 id="question-number">問題 1</h2>
+                <div id="timer-display">60:00</div>
+            </div>
+            <div id="question-container">
+                <p id="question-text">ここに問題文が表示されます。</p>
+            </div>
+            <div id="answer-options">
+                <button class="option-btn" data-choice="a">
+                    <span class="choice-prefix">a.</span>
+                    <span class="choice-text">選択肢 A のテキスト</span>
+                </button>
+                <button class="option-btn" data-choice="b">
+                    <span class="choice-prefix">b.</span>
+                    <span class="choice-text">選択肢 B のテキスト</span>
+                </button>
+                <button class="option-btn" data-choice="c">
+                    <span class="choice-prefix">c.</span>
+                    <span class="choice-text">選択肢 C のテキスト</span>
+                </button>
+                <button class="option-btn" data-choice="d">
+                    <span class="choice-prefix">d.</span>
+                    <span class="choice-text">選択肢 D のテキスト</span>
+                </button>
+            </div>
+            <div id="feedback-container">
+                <!-- 正解・不正解のフィードバックがここに表示されます -->
+            </div>
+            <div id="quiz-footer">
+                <button id="quit-quiz-btn">やめる</button>
+                <button id="next-question-btn" style="display: none;">次の問題へ</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <div id="analysis-view" style="display: none;">
+        <h1>成績分析</h1>
+        <div id="analysis-results">
+            </div>
+        <div class="analysis-footer"> <button id="back-from-analysis-btn">トップに戻る</button>
+            <button id="reset-history-btn">履歴をリセット</button> </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+<!-- 結果表示画面（最初は非表示） -->
+<div id="results-view" style="display: none;">
+    <h1>クイズ結果</h1>
+    <div id="score-summary">
+        <!-- スコア概要がここに表示されます -->
+    </div>
+    <div id="results-list">
+        <!-- 結果一覧がここに動的に生成されます -->
+    </div>
+    <div id="pagination-controls">
+        <!-- ページネーションボタンがここに表示されます -->
+    </div>
+    <button id="back-to-top-btn">トップに戻る</button>
+</div>
+
+</html>

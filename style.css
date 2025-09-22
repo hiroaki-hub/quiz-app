@@ -1,0 +1,309 @@
+/* === 基本的なスタイルのリセット === */
+body, h1, h2, p, button {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+}
+
+/* === 全体のスタイル === */
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* 背景に深みを出すグラデーションを追加 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* コンテンツが少なくても高さを確保 */
+    padding: 20px 0; /* 上下に余白を追加 */
+    text-align: center;
+    line-height: 1.6;
+}
+
+.main-container,
+#results-view,
+#analysis-view {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px; /* 角を少し丸く */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* 影をより柔らかく、モダンに */
+    border: 1px solid #e9ecef; /* 細い枠線で輪郭を強調 */
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: #2c3e50; /* 少し柔らかい黒色に */
+    font-weight: 600;
+}
+
+h2 {
+    font-size: 22px;
+    color: #34495e;
+}
+
+/* === モード選択画面のスタイル === */
+#mode-selection-view p {
+    margin-bottom: 30px;
+    color: #555;
+    font-size: 18px;
+}
+
+.mode-selection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.mode-btn {
+    padding: 15px 30px;
+    font-size: 18px;
+    color: #fff;
+    background: linear-gradient(45deg, #007bff, #0056b3); /* ボタンに立体感と高級感を */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 250px;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+}
+
+.mode-btn:hover {
+    transform: translateY(-3px); /* 少し上に浮き上がる効果 */
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+}
+
+/* === クイズ表示画面のスタイル === */
+#quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+#timer-display {
+    font-size: 24px;
+    font-weight: bold;
+    color: #e74c3c; /* 少し鮮やかな赤色に */
+}
+
+#question-number {
+    font-size: 20px;
+    color: #555;
+    font-weight: 500;
+}
+
+#question-container {
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+#question-text {
+    font-size: 20px; /* 問題文を少し大きく */
+    color: #333;
+}
+
+#answer-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.option-btn {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    text-align: left;
+    background-color: #fff;
+    border: 1px solid #d1d9e6;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.option-btn:hover {
+    border-color: #007bff;
+    transform: translateX(5px); /* 右に少しスライド */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.option-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.choice-prefix {
+    font-weight: bold;
+    margin-right: 12px;
+    color: #007bff;
+}
+
+#quiz-footer {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#next-question-btn, #quit-quiz-btn {
+    padding: 12px 25px;
+    font-size: 16px;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#next-question-btn {
+    background-color: #28a745;
+}
+#next-question-btn:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+#quit-quiz-btn {
+    background-color: #6c757d;
+}
+#quit-quiz-btn:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* 正解・不正解のスタイル */
+.option-btn.correct {
+    background-color: #e6ffed;
+    border-color: #28a745;
+    color: #155724;
+    transform: translateX(0);
+}
+.option-btn.correct:hover {
+    transform: translateX(0);
+}
+
+.option-btn.incorrect {
+    background-color: #fff0f1;
+    border-color: #dc3545;
+    color: #721c24;
+    transform: translateX(0);
+}
+.option-btn.incorrect:hover {
+    transform: translateX(0);
+}
+
+/* === 結果・分析画面の共通スタイル === */
+#results-view, #analysis-view {
+    display: none; /* JSで表示を切り替える */
+}
+
+#score-summary {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.result-item {
+    padding: 20px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.result-item.correct {
+    border-left: 5px solid #28a745;
+}
+.result-item.incorrect {
+    border-left: 5px solid #dc3545;
+}
+
+#pagination-controls {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.page-btn {
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 1px solid #007bff;
+    background-color: #fff;
+    color: #007bff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.page-btn:hover, .page-btn.active {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* 結果・分析画面のフッターボタン */
+.results-footer, .analysis-footer {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.results-footer button, .analysis-footer button {
+    width: 180px;
+    padding: 12px 0;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #fff;
+}
+
+#back-to-top-btn, #back-from-analysis-btn {
+    background-color: #007bff;
+}
+#back-to-top-btn:hover, #back-from-analysis-btn:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+#reset-history-btn {
+    background-color: #dc3545;
+}
+#reset-history-btn:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+}
+
+/* 分析画面のテーブル */
+#analysis-results table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 16px;
+}
+#analysis-results th, #analysis-results td {
+    border: 1px solid #e9ecef;
+    padding: 12px 15px;
+    text-align: left;
+}
+#analysis-results th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+/* bodyのflex設定を上書きするクラス（JSで使用） */
+body.results-active {
+    display: block;
+    height: auto;
+    align-items: initial;
+}
