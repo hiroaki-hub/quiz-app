@@ -4,18 +4,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===================================
     const mainContainer = document.querySelector('.main-container');
     const modeSelectionView = document.getElementById('mode-selection-view');
+    const genreSelectionView = document.getElementById('genre-selection-view');
     const quizView = document.getElementById('quiz-view');
     const resultsView = document.getElementById('results-view');
     const analysisView = document.getElementById('analysis-view');
+    const countdownOverlay = document.getElementById('countdown-overlay');
+    const countdownNumber = document.getElementById('countdown-number');
 
     const practiceModeBtn = document.getElementById('practice-mode-btn');
     const examModeBtn = document.getElementById('exam-mode-btn');
     const analysisModeBtn = document.getElementById('analysis-mode-btn');
     const quitQuizBtn = document.getElementById('quit-quiz-btn');
-    const nextQuestionBtn = document.getElementById('next-question-btn');
+    let nextQuestionBtn = document.getElementById('next-question-btn'); // constからletに変更
     const backToTopBtn = document.getElementById('back-to-top-btn');
     const backFromAnalysisBtn = document.getElementById('back-from-analysis-btn');
     const resetHistoryBtn = document.getElementById('reset-history-btn');
+    const genreButtonsContainer = document.getElementById('genre-buttons-container');
+    const backToModeSelectionBtn = document.getElementById('back-to-mode-selection-btn');
     
     const questionNumberEl = document.getElementById('question-number');
     const questionTextEl = document.getElementById('question-text');
@@ -49,9 +54,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===================================
     // 2. イベントリスナーの設定
     // ===================================
-    practiceModeBtn.addEventListener('click', () => startQuiz('practice'));
-    examModeBtn.addEventListener('click', () => startQuiz('exam'));
+    practiceModeBtn.addEventListener('click', showGenreSelection);
+    examModeBtn.addEventListener('click', startExamCountdown);
     analysisModeBtn.addEventListener('click', showAnalysis);
+
+    backToModeSelectionBtn.addEventListener('click', () => {
+        genreSelectionView.style.display = 'none';
+        modeSelectionView.style.display = 'block';
+    });
 
     quitQuizBtn.addEventListener('click', () => {
         Swal.fire({
@@ -70,15 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 modeSelectionView.style.display = 'block';
             }
         });
-    });
-
-    nextQuestionBtn.addEventListener('click', () => {
-        currentQuestionIndex++;
-        if (currentQuestionIndex < currentQuestions.length) {
-            displayQuestion(currentQuestionIndex, 'practice');
-        } else {
-            showResults();
-        }
     });
 
     backToTopBtn.addEventListener('click', () => {
@@ -127,55 +128,131 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. 主要な関数
     // ===================================
 
-    // --- 初期化 ---
-    fetch('questions.json')
-        .then(response => response.ok ? response.json() : Promise.reject(new Error('File not found')))
-        .then(data => {
-            allQuestions = data;
-        })
-        .catch(error => {
-            console.error('データの読み込み中にエラーが発生しました:', error);
-            alert('クイズデータの読み込みに失敗しました。');
-        });
+function startExamCountdown() {
+    modeSelectionView.style.display = 'none';
+    countdownOverlay.style.display = 'flex';
+    let count = 3;
+    countdownNumber.textContent = count;
 
-    // --- クイズの開始と進行 ---
-    function startQuiz(mode) {
-        userAnswers = [];
-        currentQuestionIndex = 0;
-        currentQuestions = shuffleAndPickQuestions(allQuestions, 60);
-
-        if (mode === 'practice') {
-            timerDisplay.style.display = 'none';
-        } else if (mode === 'exam') {
-            startTimer(60 * 60);
+    const countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+            countdownNumber.textContent = count;
+        } else if (count === 0) {
+            countdownNumber.textContent = 'Go!';
+        } else {
+            clearInterval(countdownInterval);
+            countdownOverlay.style.display = 'none';
+            startQuiz('exam');
         }
-        
-        modeSelectionView.style.display = 'none';
-        quizView.style.display = 'block';
-        resultsView.style.display = 'none';
-        analysisView.style.display = 'none';
-        displayQuestion(currentQuestionIndex, mode);
+    }, 1000);
+}
+
+function showGenreSelection() {
+    modeSelectionView.style.display = 'none';
+    genreSelectionView.style.display = 'block';
+
+    const genres = [...new Set(allQuestions.map(q => q.ジャンル))];
+    genreButtonsContainer.innerHTML = '';
+
+    const randomBtn = document.createElement('button');
+    randomBtn.className = 'mode-btn random-btn';
+    randomBtn.textContent = '全ジャンルからランダム';
+    randomBtn.addEventListener('click', () => startQuiz('practice', 'random'));
+    genreButtonsContainer.appendChild(randomBtn);
+
+    genres.forEach(genre => {
+        const btn = document.createElement('button');
+        btn.className = 'mode-btn';
+        btn.textContent = genre;
+        btn.addEventListener('click', () => startQuiz('practice', genre));
+        genreButtonsContainer.appendChild(btn);
+    });
+}
+
+function startQuiz(mode, genre = 'random') {
+    modeSelectionView.style.display = 'none';
+    genreSelectionView.style.display = 'none';
+    quizView.style.display = 'block';
+    resultsView.style.display = 'none';
+    analysisView.style.display = 'none';
+    document.body.classList.remove('results-active');
+
+    currentQuestionIndex = 0;
+    userAnswers = [];
+
+    let questionsToUse = allQuestions;
+
+    if (mode === 'practice') {
+        if (genre !== 'random') {
+            questionsToUse = allQuestions.filter(q => q.ジャンル === genre);
+        }
+        const practiceQuestionCount = Math.min(questionsToUse.length, 10);
+        currentQuestions = shuffleAndPickQuestions(questionsToUse, practiceQuestionCount);
+        timerDisplay.style.display = 'none';
+    } else { // exam mode
+        // 本番モード：60問をランダムに選ぶ
+        const examQuestionCount = Math.min(allQuestions.length, 60);
+        currentQuestions = shuffleAndPickQuestions(allQuestions, examQuestionCount);
+        // 制限時間を60分に設定
+        startTimer(3600);
     }
 
-    function displayQuestion(index, mode) {
-        feedbackContainerEl.innerHTML = '';
-        nextQuestionBtn.style.display = 'none';
-        const question = currentQuestions[index];
-        questionNumberEl.textContent = `問題 ${index + 1}`;
-        questionTextEl.textContent = question.問題文;
-        answerOptionsEl.innerHTML = '';
+    if (currentQuestions.length > 0) {
+        displayQuestion(currentQuestionIndex, mode);
+    } else {
+        alert('クイズを開始できません。選択されたジャンルの問題がありません。');
+        genreSelectionView.style.display = 'none';
+        modeSelectionView.style.display = 'block';
+        quizView.style.display = 'none';
+    }
+}
 
-        ['a', 'b', 'c', 'd'].forEach(choice => {
-            const button = document.createElement('button');
-            button.className = 'option-btn';
-            button.dataset.choice = choice;
-            button.innerHTML = `<span class="choice-prefix">${choice}.</span><span class="choice-text">${question[`選択肢${choice}`]}</span>`;
-            
+function displayQuestion(index, mode) {
+    feedbackContainerEl.innerHTML = '';
+    nextQuestionBtn.style.display = 'none';
+    const question = currentQuestions[index];
+    const isMultipleChoice = Array.isArray(question.正解); // ★複数選択か判定
+
+    questionNumberEl.textContent = `問題 ${index + 1}`;
+    questionTextEl.textContent = question.問題文;
+    answerOptionsEl.innerHTML = '';
+
+    ['a', 'b', 'c', 'd'].forEach(choice => {
+        const button = document.createElement('button');
+        button.className = 'option-btn';
+        button.dataset.choice = choice;
+        button.innerHTML = `<span class="choice-prefix">${choice}.</span><span class="choice-text">${question[`選択肢${choice}`]}</span>`;
+        
+        if (isMultipleChoice) {
+            // 複数選択の場合：クリックで選択/解除を切り替える
+            button.addEventListener('click', () => {
+                button.classList.toggle('selected');
+            });
+        } else {
+            // 単一選択の場合：これまで通りの処理
             const action = mode === 'practice' ? () => checkAnswer(choice) : () => recordAnswerAndProceed(choice);
             button.addEventListener('click', action);
-            answerOptionsEl.appendChild(button);
-        });
+        }
+        answerOptionsEl.appendChild(button);
+    });
+
+    // 複数選択問題の場合、「解答を確定」ボタンを常に表示
+    if (isMultipleChoice) {
+        nextQuestionBtn.textContent = '解答を確定';
+        nextQuestionBtn.style.display = 'block';
+        
+        // 複数選択用のイベントリスナーを一度だけ設定
+        const newNextBtn = nextQuestionBtn.cloneNode(true);
+        nextQuestionBtn.parentNode.replaceChild(newNextBtn, nextQuestionBtn);
+        nextQuestionBtn = newNextBtn; // グローバル変数を更新
+
+        const action = mode === 'practice' ? () => checkAnswer(null, true) : () => recordAnswerAndProceed(null, true);
+        nextQuestionBtn.addEventListener('click', action);
+    } else {
+        nextQuestionBtn.textContent = '次の問題へ'; // テキストを元に戻す
     }
+}
 
     function startTimer(durationInSeconds) {
         let timer = durationInSeconds;
@@ -192,39 +269,89 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 解答処理 ---
-    function recordAnswerAndProceed(selectedChoice) {
-        const currentQuestion = currentQuestions[currentQuestionIndex];
-        userAnswers.push({ questionId: currentQuestion.id, userAnswer: selectedChoice });
+function recordAnswerAndProceed(selectedChoice, isMultiple = false) {
+    const currentQuestion = currentQuestions[currentQuestionIndex];
+    let userAnswer;
+
+    if (isMultiple) {
+        const selectedNodes = answerOptionsEl.querySelectorAll('.option-btn.selected');
+        userAnswer = Array.from(selectedNodes).map(node => node.dataset.choice).sort();
+    } else {
+        userAnswer = selectedChoice;
+    }
+
+    userAnswers.push({ questionId: currentQuestion.id, userAnswer: userAnswer });
+    currentQuestionIndex++;
+
+    if (currentQuestionIndex < currentQuestions.length) {
+        displayQuestion(currentQuestionIndex, 'exam');
+    } else {
+        showResults();
+    }
+}
+
+function checkAnswer(selectedChoice, isMultiple = false) {
+    const currentQuestion = currentQuestions[currentQuestionIndex];
+    const correctAnswer = currentQuestion.正解;
+    let userAnswer;
+    let isCorrect;
+
+    answerOptionsEl.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+    const feedbackEl = document.createElement('div');
+
+    if (isMultiple) {
+        const selectedNodes = answerOptionsEl.querySelectorAll('.option-btn.selected');
+        userAnswer = Array.from(selectedNodes).map(node => node.dataset.choice).sort();
+        // 配列を比較するために文字列に変換
+        isCorrect = JSON.stringify(userAnswer) === JSON.stringify([...correctAnswer].sort());
+    } else {
+        userAnswer = selectedChoice;
+        isCorrect = userAnswer === correctAnswer;
+    }
+
+    userAnswers.push({ questionId: currentQuestion.id, userAnswer: userAnswer });
+
+    if (isCorrect) {
+        feedbackEl.innerHTML = '<h3>正解！</h3>';
+        // 正解した選択肢をハイライト
+        const choices = Array.isArray(userAnswer) ? userAnswer : [userAnswer];
+        choices.forEach(choice => {
+            answerOptionsEl.querySelector(`[data-choice='${choice}']`).classList.add('correct');
+        });
+    } else {
+        feedbackEl.innerHTML = '<h3>不正解…</h3>';
+        // 不正解の選択肢と正解をハイライト
+        const userChoices = Array.isArray(userAnswer) ? userAnswer : [userAnswer];
+        const correctChoices = Array.isArray(correctAnswer) ? correctAnswer : [correctAnswer];
+        
+        userChoices.forEach(choice => {
+            if (!correctChoices.includes(choice)) {
+                answerOptionsEl.querySelector(`[data-choice='${choice}']`).classList.add('incorrect');
+            }
+        });
+        correctChoices.forEach(choice => {
+            answerOptionsEl.querySelector(`[data-choice='${choice}']`).classList.add('correct');
+        });
+    }
+
+    feedbackEl.innerHTML += `<p><strong>解説：</strong> ${currentQuestion.解説}</p>`;
+    feedbackContainerEl.appendChild(feedbackEl);
+    nextQuestionBtn.textContent = '次の問題へ';
+    nextQuestionBtn.style.display = 'block';
+
+    // 練習モードの「次の問題へ」のイベントリスナーを再設定
+    const newNextBtn = nextQuestionBtn.cloneNode(true);
+    nextQuestionBtn.parentNode.replaceChild(newNextBtn, nextQuestionBtn);
+    nextQuestionBtn = newNextBtn;
+    newNextBtn.addEventListener('click', () => {
         currentQuestionIndex++;
         if (currentQuestionIndex < currentQuestions.length) {
-            displayQuestion(currentQuestionIndex, 'exam');
+            displayQuestion(currentQuestionIndex, 'practice');
         } else {
             showResults();
         }
-    }
-
-    function checkAnswer(selectedChoice) {
-        const currentQuestion = currentQuestions[currentQuestionIndex];
-        userAnswers.push({ questionId: currentQuestion.id, userAnswer: selectedChoice });
-        answerOptionsEl.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
-        
-        const correctAnswer = currentQuestion.正解;
-        const selectedButton = answerOptionsEl.querySelector(`[data-choice='${selectedChoice}']`);
-        const feedbackEl = document.createElement('div');
-
-        if (selectedChoice === correctAnswer) {
-            selectedButton.classList.add('correct');
-            feedbackEl.innerHTML = '<h3>正解！</h3>';
-        } else {
-            selectedButton.classList.add('incorrect');
-            answerOptionsEl.querySelector(`[data-choice='${correctAnswer}']`).classList.add('correct');
-            feedbackEl.innerHTML = '<h3>不正解…</h3>';
-        }
-
-        feedbackEl.innerHTML += `<p><strong>解説：</strong> ${currentQuestion.解説}</p>`;
-        feedbackContainerEl.appendChild(feedbackEl);
-        nextQuestionBtn.style.display = 'block';
-    }
+    });
+}
 
     // --- 結果と分析の表示 ---
     function showResults() {
@@ -236,7 +363,16 @@ document.addEventListener('DOMContentLoaded', () => {
         let correctCount = 0;
         const userAnswerMap = new Map(userAnswers.map(ans => [ans.questionId, ans.userAnswer]));
         currentQuestions.forEach(question => {
-            if (userAnswerMap.get(question.id) === question.正解) {
+            const userAnswer = userAnswerMap.get(question.id);
+            let isCorrect = false;
+            if (Array.isArray(question.正解)) {
+                // 複数選択の判定
+                isCorrect = JSON.stringify(userAnswer) === JSON.stringify([...question.正解].sort());
+            } else {
+                // 単一選択の判定
+                isCorrect = userAnswer === question.正解;
+            }
+            if (isCorrect) {
                 correctCount++;
             }
         });
@@ -268,7 +404,15 @@ document.addEventListener('DOMContentLoaded', () => {
         pageQuestions.forEach((question, index) => {
             const overallIndex = startIndex + index;
             const userAnswer = userAnswerMap.get(question.id);
-            const isCorrect = userAnswer === question.正解;
+            let isCorrect = false;
+
+            if (Array.isArray(question.正解)) {
+                // 複数選択の判定
+                isCorrect = JSON.stringify(userAnswer) === JSON.stringify([...question.正解].sort());
+            } else {
+                // 単一選択の判定
+                isCorrect = userAnswer === question.正解;
+            }
 
             const resultItem = document.createElement('div');
             resultItem.className = `result-item ${isCorrect ? 'correct' : 'incorrect'}`;
@@ -332,7 +476,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         genreStats[genre] = { correct: 0, total: 0 };
                     }
                     genreStats[genre].total++;
-                    if (answer.userAnswer === question.正解) {
+                    let isCorrect = false;
+                    if (Array.isArray(question.正解)) {
+                        // 複数選択の判定
+                        isCorrect = JSON.stringify(answer.userAnswer) === JSON.stringify([...question.正解].sort());
+                    } else {
+                        // 単一選択の判定
+                        isCorrect = answer.userAnswer === question.正解;
+                    }
+
+                    if (isCorrect) {
                         genreStats[genre].correct++;
                     }
                 }

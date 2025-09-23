@@ -11,10 +11,29 @@
         <h1>模擬試験アプリ</h1>
         <div id="mode-selection-view">
             <p>モードを選択してください</p>
-            <div class="mode-selection">
-                <button id="practice-mode-btn" class="mode-btn">練習モード</button>
-                <button id="exam-mode-btn" class="mode-btn">本番モード</button>
-                <button id="analysis-mode-btn" class="mode-btn">分析モード</button>
+                    <div class="mode-selection">
+                        <div class="mode-item">
+                            <button id="practice-mode-btn" class="mode-btn">練習モード</button>
+                            <p class="mode-description">ジャンルを選んで10問挑戦。時間制限なしで気軽に実力試しができます。</p>
+                        </div>
+                        <div class="mode-item">
+                            <button id="exam-mode-btn" class="mode-btn">本番モード</button>
+                            <p class="mode-description">全ジャンルからランダムに60問が出題されます。制限時間は60分です。</p>
+                        </div>
+                        <div class="mode-item">
+                            <button id="analysis-mode-btn" class="mode-btn">分析モード</button>
+                            <p class="mode-description">過去のテスト結果や、ジャンルごとの正解率を確認して弱点を分析できます。</p>
+                        </div>
+                    </div>        </div>
+
+        <!-- ジャンル選択画面（最初は非表示） -->
+        <div id="genre-selection-view" style="display: none;">
+            <h2>ジャンルを選択してください</h2>
+            <div id="genre-buttons-container">
+                <!-- ジャンルボタンがここに動的に挿入されます -->
+            </div>
+            <div class="genre-footer">
+                <button id="back-to-mode-selection-btn" class="mode-btn back-btn">モード選択に戻る</button>
             </div>
         </div>
 
@@ -65,25 +84,29 @@
             <button id="reset-history-btn">履歴をリセット</button> </div>
     </div>
 
+    <!-- 結果表示画面（最初は非表示） -->
+    <div id="results-view" style="display: none;">
+        <h1>クイズ結果</h1>
+        <div id="score-summary">
+            <!-- スコア概要がここに表示されます -->
+        </div>
+        <div id="results-list">
+            <!-- 結果一覧がここに動的に生成されます -->
+        </div>
+        <div id="pagination-controls">
+            <!-- ページネーションボタンがここに表示されます -->
+        </div>
+
+        <div class="results-footer">
+            <button id="back-to-top-btn">トップに戻る</button>
+        </div>
+    </div>
+
     <script src="app.js"></script>
+
+    <!-- Countdown Overlay -->
+    <div id="countdown-overlay" style="display: none;">
+        <div id="countdown-number"></div>
+    </div>
 </body>
-
-<!-- 結果表示画面（最初は非表示） -->
-<div id="results-view" style="display: none;">
-    <h1>クイズ結果</h1>
-    <div id="score-summary">
-        <!-- スコア概要がここに表示されます -->
-    </div>
-    <div id="results-list">
-        <!-- 結果一覧がここに動的に生成されます -->
-    </div>
-    <div id="pagination-controls">
-        <!-- ページネーションボタンがここに表示されます -->
-    </div>
-
-    <div class="results-footer">
-        <button id="back-to-top-btn">トップに戻る</button>
-    </div>
-</div>
-
 </html>
