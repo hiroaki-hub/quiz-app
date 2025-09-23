@@ -406,3 +406,44 @@ body.results-active {
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.1); opacity: 0.8; }
 }
+
+/* === レスポンシブ対応（スマホ向け） === */
+@media (max-width: 768px) {
+    body {
+        padding: 10px 0;
+    }
+
+    .main-container,
+    #results-view,
+    #analysis-view {
+        padding: 20px;
+        width: 95%;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    .mode-btn {
+        padding: 12px 20px;
+        font-size: 16px;
+        min-width: 220px;
+    }
+
+    .mode-description {
+        font-size: 14px;
+    }
+
+    #question-text {
+        font-size: 18px;
+    }
+
+    .option-btn {
+        padding: 12px;
+        font-size: 15px;
+    }
+
+    #countdown-number {
+        font-size: 120px;
+    }
+}
