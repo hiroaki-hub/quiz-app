@@ -401,6 +401,17 @@ function checkAnswer(selectedChoice, isMultiple = false) {
         const userAnswerMap = new Map(userAnswers.map(ans => [ans.questionId, ans.userAnswer]));
         resultsListEl.innerHTML = '';
 
+        const getAnswerText = (question, choice) => {
+            if (!choice || (Array.isArray(choice) && choice.length === 0)) {
+                return '無回答';
+            }
+            if (Array.isArray(choice)) {
+                return choice.map(c => `${c}. ${question[`選択肢${c}`]}`).join('<br>');
+            } else {
+                return `${choice}. ${question[`選択肢${choice}`]}`;
+            }
+        };
+
         pageQuestions.forEach((question, index) => {
             const overallIndex = startIndex + index;
             const userAnswer = userAnswerMap.get(question.id);
@@ -414,6 +425,9 @@ function checkAnswer(selectedChoice, isMultiple = false) {
                 isCorrect = userAnswer === question.正解;
             }
 
+            const userAnswerText = getAnswerText(question, userAnswer);
+            const correctAnswerText = getAnswerText(question, question.正解);
+
             const resultItem = document.createElement('div');
             resultItem.className = `result-item ${isCorrect ? 'correct' : 'incorrect'}`;
             resultItem.innerHTML = `
@@ -422,8 +436,8 @@ function checkAnswer(selectedChoice, isMultiple = false) {
                     <p class="result-q-text">${question.問題文}</p>
                 </div>
                 <div class="result-answers">
-                    <p>あなたの解答: <span class="user-answer ${isCorrect ? '' : 'incorrect-choice'}">${userAnswer || '無回答'}</span></p>
-                    <p>正解: <span class="correct-answer">${question.正解}</span></p>
+                    <p>あなたの解答: <span class="user-answer ${isCorrect ? '' : 'incorrect-choice'}">${userAnswerText}</span></p>
+                    <p>正解: <span class="correct-answer">${correctAnswerText}</span></p>
                 </div>
                 <div class="result-explanation">
                     <p><strong>解説:</strong> ${question.解説}</p>
