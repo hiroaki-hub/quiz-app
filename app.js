@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const practiceModeBtn = document.getElementById('practice-mode-btn');
     const examModeBtn = document.getElementById('exam-mode-btn');
     const analysisModeBtn = document.getElementById('analysis-mode-btn');
+    const incorrectQuestionsModeBtn = document.getElementById('incorrect-questions-mode-btn');
     const quitQuizBtn = document.getElementById('quit-quiz-btn');
     let nextQuestionBtn = document.getElementById('next-question-btn'); // constからletに変更
     const backToTopBtn = document.getElementById('back-to-top-btn');
@@ -57,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     practiceModeBtn.addEventListener('click', showGenreSelection);
     examModeBtn.addEventListener('click', startExamCountdown);
     analysisModeBtn.addEventListener('click', showAnalysis);
+    incorrectQuestionsModeBtn.addEventListener('click', startIncorrectPracticeMode);
 
     backToModeSelectionBtn.addEventListener('click', () => {
         genreSelectionView.style.display = 'none';
@@ -170,7 +172,64 @@ function showGenreSelection() {
     });
 }
 
-function startQuiz(mode, genre = 'random') {
+function startIncorrectPracticeMode() {
+    const history = JSON.parse(localStorage.getItem('quizHistory')) || [];
+    if (history.length === 0) {
+        Swal.fire('履歴なし', 'まだクイズの解答履歴がありません。', 'info');
+        return;
+    }
+
+    const questionStats = new Map();
+
+    // 1. 全ての解答履歴を集計する
+    history.forEach(testResult => {
+        testResult.answers.forEach(answer => {
+            const question = allQuestions.find(q => q.id === answer.questionId);
+            if (question) {
+                // 統計情報がなければ初期化
+                if (!questionStats.has(question.id)) {
+                    questionStats.set(question.id, { correct: 0, incorrect: 0 });
+                }
+
+                const stats = questionStats.get(question.id);
+                let isCorrect = false;
+                if (Array.isArray(question.正解)) {
+                    isCorrect = JSON.stringify(answer.userAnswer) === JSON.stringify([...question.正解].sort());
+                } else {
+                    isCorrect = answer.userAnswer === question.正解;
+                }
+
+                if (isCorrect) {
+                    stats.correct++;
+                } else {
+                    stats.incorrect++;
+                }
+                questionStats.set(question.id, stats);
+            }
+        });
+    });
+
+    // 2. 出題する問題を選定する
+    const questionsForQuizIds = [];
+    for (const [questionId, stats] of questionStats.entries()) {
+        // 一度でも間違えたことがあり、かつ、正解回数が3回未満の問題
+        if (stats.incorrect > 0 && stats.correct < 3) {
+            questionsForQuizIds.push(questionId);
+        }
+    }
+
+    if (questionsForQuizIds.length === 0) {
+        Swal.fire('素晴らしい！', '苦手な問題はすべて克服しました！', 'success');
+        return;
+    }
+
+    const incorrectQuestions = allQuestions.filter(q => questionsForQuizIds.includes(q.id));
+    
+    // 苦手克服モードとしてクイズを開始
+    startQuiz('practice', null, incorrectQuestions);
+}
+
+function startQuiz(mode, genre = 'random', customQuestions = null) {
     modeSelectionView.style.display = 'none';
     genreSelectionView.style.display = 'none';
     quizView.style.display = 'block';
@@ -181,27 +240,38 @@ function startQuiz(mode, genre = 'random') {
     currentQuestionIndex = 0;
     userAnswers = [];
 
-    let questionsToUse = allQuestions;
-
-    if (mode === 'practice') {
-        if (genre !== 'random') {
-            questionsToUse = allQuestions.filter(q => q.ジャンル === genre);
+    if (customQuestions) {
+        // カスタム問題リストがある場合は、それをシャッフルして使用
+        currentQuestions = shuffleAndPickQuestions(customQuestions, customQuestions.length);
+    } else {
+        let questionsToUse = allQuestions;
+        if (mode === 'practice') {
+            if (genre !== 'random') {
+                questionsToUse = allQuestions.filter(q => q.ジャンル === genre);
+            }
+            const practiceQuestionCount = Math.min(questionsToUse.length, 10);
+            currentQuestions = shuffleAndPickQuestions(questionsToUse, practiceQuestionCount);
+        } else { // exam mode
+            const examQuestionCount = Math.min(allQuestions.length, 60);
+            currentQuestions = shuffleAndPickQuestions(allQuestions, examQuestionCount);
         }
-        const practiceQuestionCount = Math.min(questionsToUse.length, 10);
-        currentQuestions = shuffleAndPickQuestions(questionsToUse, practiceQuestionCount);
-        timerDisplay.style.display = 'none';
-    } else { // exam mode
-        // 本番モード：60問をランダムに選ぶ
-        const examQuestionCount = Math.min(allQuestions.length, 60);
-        currentQuestions = shuffleAndPickQuestions(allQuestions, examQuestionCount);
-        // 制限時間を60分に設定
+    }
+    
+    // タイマーの表示制御
+    if (mode === 'exam') {
         startTimer(3600);
+    } else {
+        timerDisplay.style.display = 'none';
     }
 
     if (currentQuestions.length > 0) {
         displayQuestion(currentQuestionIndex, mode);
     } else {
-        alert('クイズを開始できません。選択されたジャンルの問題がありません。');
+        // ユーザーにフィードバックを提供
+        if (!customQuestions) {
+            alert('クイズを開始できません。選択されたジャンルの問題がありません。');
+        }
+        // カスタム問題モードで問題がない場合は、startIncorrectPracticeMode内でメッセージ表示済み
         genreSelectionView.style.display = 'none';
         modeSelectionView.style.display = 'block';
         quizView.style.display = 'none';
