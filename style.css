@@ -429,8 +429,17 @@ body.results-active {
     }
 
     h1 {
-        font-size: 30px;
-        line-height: 1.4;
+        font-size: 28px;
+        line-height: 1.3;
+        margin-bottom: 20px; /* 30pxから変更 */
+    }
+
+    #mode-selection-view p {
+        margin-bottom: 20px; /* 30pxから変更 */
+    }
+
+    .mode-selection {
+        gap: 20px; /* 30pxから変更 */
     }
 
     .mode-btn {
@@ -441,6 +450,7 @@ body.results-active {
 
     .mode-description {
         font-size: 14px;
+        margin-top: 8px; /* 10pxから変更 */
     }
 
     #question-text {
